@@ -24,7 +24,6 @@
     platform_intrinsics,
     range_contains,
     stmt_expr_attributes,
-    get_type_id,
     alloc_error_handler,
     const_fn_union,
 )]

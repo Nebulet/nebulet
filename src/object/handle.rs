@@ -53,7 +53,7 @@ impl<T> Handle<T>
 where
     T: Dispatcher + Sized
 {
-    pub fn upcast(self) -> Handle<Dispatcher> {
+    pub fn upcast(self) -> Handle<dyn Dispatcher> {
         Handle {
             dispatch: self.dispatch.upcast(),
             rights: self.rights,
@@ -61,7 +61,7 @@ where
     }
 }
 
-impl Handle<Dispatcher> {
+impl Handle<dyn Dispatcher> {
     pub fn cast<T: Dispatcher>(&self) -> Result<Handle<T>> {
         let dispatch = self.dispatch.cast()?;
 

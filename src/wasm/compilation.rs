@@ -183,7 +183,7 @@ impl Compilation {
 /// Define functions, etc and then "compile"
 /// it all into a `Compliation`.
 pub struct Compiler<'isa> {
-    isa: &'isa TargetIsa,
+    isa: &'isa dyn TargetIsa,
 
     contexts: Vec<(cranelift_codegen::Context, usize)>,
 
@@ -191,11 +191,11 @@ pub struct Compiler<'isa> {
 }
 
 impl<'isa> Compiler<'isa> {
-    pub fn new(isa: &'isa TargetIsa) -> Self {
+    pub fn new(isa: &'isa dyn TargetIsa) -> Self {
         Self::with_capacity(isa, 0)
     }
 
-    pub fn with_capacity(isa: &'isa TargetIsa, capacity: usize) -> Self {
+    pub fn with_capacity(isa: &'isa dyn TargetIsa, capacity: usize) -> Self {
         Compiler {
             isa,
             contexts: Vec::with_capacity(capacity),

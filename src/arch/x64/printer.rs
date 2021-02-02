@@ -53,6 +53,5 @@ impl Write for Printer {
 }
 
 pub fn _print(args: ::core::fmt::Arguments) {
-    use core::fmt::Write;
     let _ = PRINTER.lock().write_fmt(args);
 }

@@ -129,15 +129,14 @@ where
         }
     }
 }
-
-impl Dispatch<Dispatcher> {
+impl Dispatch<dyn Dispatcher> {
     pub fn cast<T: Dispatcher>(&self) -> Result<Dispatch<T>> {
-        if self.inner.dispatcher.get_type_id() == TypeId::of::<T>() {
+        if self.inner.dispatcher.type_id() == TypeId::of::<T>() {
             use core::mem;
 
             let this = self.copy_ref();
 
-            let ptr = &this as *const Dispatch<Dispatcher> as *const Dispatch<T>;
+            let ptr = &this as *const Dispatch<dyn Dispatcher> as *const Dispatch<T>;
             mem::forget(this);
 
             Ok(unsafe { ptr.read() })
@@ -148,8 +147,8 @@ impl Dispatch<Dispatcher> {
 }
 
 impl<T: Dispatcher + Sized> Dispatch<T> {
-    pub fn upcast(self) -> Dispatch<Dispatcher> {
-        let inner = self.inner as Arc<DispatchInner<Dispatcher>>;
+    pub fn upcast(self) -> Dispatch<dyn Dispatcher> {
+        let inner = self.inner as Arc<DispatchInner<dyn Dispatcher>>;
         Dispatch {
             inner,
         }
@@ -190,11 +189,11 @@ pub enum ObserverResult {
 pub struct LocalObserver<'local, 'dispatch, S: StateObserver + 'local> {
     slot: TableSlot,
     observer: &'local mut S,
-    dispatch: &'dispatch Dispatch<Dispatcher>,
+    dispatch: &'dispatch Dispatch<dyn Dispatcher>,
 }
 
 impl<'local, 'dispatch, S: StateObserver + Send + Any> LocalObserver<'local, 'dispatch, S> {
-    pub fn new(observer: &'local mut S, dispatch: &'dispatch mut Dispatch<Dispatcher>) -> Option<LocalObserver<'local, 'dispatch, S>> {
+    pub fn new(observer: &'local mut S, dispatch: &'dispatch mut Dispatch<dyn Dispatcher>) -> Option<LocalObserver<'local, 'dispatch, S>> {
         let slot = unsafe { dispatch.add_observer(observer as *mut _)? };
 
         Some(LocalObserver {
@@ -214,7 +213,7 @@ impl<'local, 'dispatch> LocalObserver<'local, 'dispatch, WaitObserver> {
 impl<'local, 'dispatch, S: StateObserver> Drop for LocalObserver<'local, 'dispatch, S> {
     fn drop(&mut self) {
         if let Some(observer_ptr) = self.dispatch.remove_observer(self.slot) {
-            assert!(observer_ptr == self.observer as *mut _);
+            assert_eq!(observer_ptr, self.observer as *mut _);
         }
     }
 }
@@ -222,6 +221,6 @@ impl<'local, 'dispatch, S: StateObserver> Drop for LocalObserver<'local, 'dispat
 pub trait StateObserver: Send {
     fn on_init(&mut self, initial_state: Signal) -> ObserverResult;
     fn on_state_change(&mut self, new_state: Signal) -> ObserverResult;
-    fn on_destruction(&mut self, handle: &Handle<Dispatcher>) -> ObserverResult;
+    fn on_destruction(&mut self, handle: &Handle<dyn Dispatcher>) -> ObserverResult;
     fn on_removal(&mut self) {}
 }

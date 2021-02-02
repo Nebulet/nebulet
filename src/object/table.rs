@@ -6,7 +6,7 @@ use nabi::{Result, Error};
 
 pub struct HandleTable {
     /// Raw array of handles,
-    array: Array<Option<Handle<Dispatcher>>>,
+    array: Array<Option<Handle<dyn Dispatcher>>>,
     /// Stack/queue of free indices.
     free_indices: Array<usize>,
 }
@@ -19,7 +19,7 @@ impl HandleTable {
         }
     }
 
-    pub fn get_uncasted(&self, user_handle: UserHandle<Dispatcher>) -> Result<&Handle<Dispatcher>> {
+    pub fn get_uncasted(&self, user_handle: UserHandle<dyn Dispatcher>) -> Result<&Handle<dyn Dispatcher>> {
         self.array.get(user_handle.inner() as usize)
             .and_then(|obj| obj.as_ref())
             .ok_or(Error::NOT_FOUND)
@@ -34,7 +34,7 @@ impl HandleTable {
 
     /// This makes a copy of the supplied handle
     /// and inserts it into `self`.
-    pub fn transfer_handle(&mut self, handle: Handle<Dispatcher>) -> Result<UserHandle<Dispatcher>> {
+    pub fn transfer_handle(&mut self, handle: Handle<dyn Dispatcher>) -> Result<UserHandle<dyn Dispatcher>> {
         if handle.rights().contains(HandleRights::TRANSFER) {
             self.allocate_handle_uncasted(handle)
         } else {
@@ -42,14 +42,14 @@ impl HandleTable {
         }
     }
 
-    fn allocate_handle_uncasted(&mut self, handle: Handle<Dispatcher>) -> Result<UserHandle<Dispatcher>> {
+    fn allocate_handle_uncasted(&mut self, handle: Handle<dyn Dispatcher>) -> Result<UserHandle<dyn Dispatcher>> {
         if let Some(index) = self.free_indices.pop() {
             debug_assert!(self.array[index].is_none());
             self.array[index] = Some(handle);
-            Ok(UserHandle::<Dispatcher>::new(index as u32))
+            Ok(UserHandle::<dyn Dispatcher>::new(index as u32))
         } else {
             self.array.push(Some(handle))?;
-            Ok(UserHandle::<Dispatcher>::new(self.array.len() as u32 - 1))
+            Ok(UserHandle::<dyn Dispatcher>::new(self.array.len() as u32 - 1))
         }
     }
 
@@ -69,7 +69,7 @@ impl HandleTable {
         self.allocate_handle(handle)
     }
 
-    pub fn free_uncasted(&mut self, user_handle: UserHandle<Dispatcher>) -> Result<Handle<Dispatcher>> {
+    pub fn free_uncasted(&mut self, user_handle: UserHandle<dyn Dispatcher>) -> Result<Handle<dyn Dispatcher>> {
         let index = user_handle.inner() as usize;
         let handle = self.array.replace_at(index, None)
             .and_then(|opt| opt)
@@ -91,7 +91,7 @@ impl HandleTable {
         handle.cast()
     }
 
-    pub fn duplicate_uncasted(&mut self, user_handle: UserHandle<Dispatcher>, new_rights: HandleRights) -> Result<UserHandle<Dispatcher>> {
+    pub fn duplicate_uncasted(&mut self, user_handle: UserHandle<dyn Dispatcher>, new_rights: HandleRights) -> Result<UserHandle<dyn Dispatcher>> {
         let dup = {
             let handle = self.get_uncasted(user_handle)?;
             handle.duplicate(new_rights)

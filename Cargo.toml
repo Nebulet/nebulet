@@ -63,7 +63,7 @@ bootloader = { git = "https://github.com/lachlansneff/bootloader", branch = "boo
 spin = "0.4.9"
 bitflags = "1.0"
 bit_field = "0.9.0"
-hashmap_core = "0.1.8"
+hashmap_core = "0.1.10"
 acpi = { git = "https://github.com/rust-osdev/acpi" }
 
 # lib/
@@ -75,7 +75,7 @@ version = "1.0.0"
 features = ["spin_no_std"]
 
 [dependencies.rand_core]
-version = "0.2"
+version = "0.4.2"
 default-features = false
 
 [dependencies.rand]

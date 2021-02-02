@@ -48,7 +48,7 @@ impl StateObserver for WaitObserver {
         ObserverResult::Keep
     }
 
-    fn on_destruction(&mut self, _handle: &Handle<Dispatcher>) -> ObserverResult {
+    fn on_destruction(&mut self, _handle: &Handle<dyn Dispatcher>) -> ObserverResult {
         ObserverResult::Keep
     }
 

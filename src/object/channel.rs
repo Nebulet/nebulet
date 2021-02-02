@@ -12,11 +12,11 @@ pub const MAX_MSG_SIZE: usize   = 64 * 1024; // 64 KiB
 
 pub struct Message {
     data: Vec<u8>,
-    handles: Vec<Handle<Dispatcher>>,
+    handles: Vec<Handle<dyn Dispatcher>>,
 }
 
 impl Message {
-    pub fn new(data: &[u8], handles: Vec<Handle<Dispatcher>>) -> Result<Message> {
+    pub fn new(data: &[u8], handles: Vec<Handle<dyn Dispatcher>>) -> Result<Message> {
         if data.len() > MAX_MSG_SIZE {
             return Err(Error::INVALID_ARG);
         }
@@ -31,7 +31,7 @@ impl Message {
         &self.data
     }
 
-    pub fn handles(&self) -> &[Handle<Dispatcher>] {
+    pub fn handles(&self) -> &[Handle<dyn Dispatcher>] {
         &self.handles
     }
 }

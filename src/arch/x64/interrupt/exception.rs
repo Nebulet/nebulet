@@ -57,8 +57,8 @@ interrupt_stack_err!(general_protection_fault, _stack, _error, {
     loop {}
 });
 
-/// This is used to catch "out of bounds" wasm heap
-/// accesses, as well as to implement lazy paging.
+// This is used to catch "out of bounds" wasm heap
+// accesses, as well as to implement lazy paging.
 interrupt_stack_page!(page_fault, stack, error, {
     let faulting_addr: *const ();
     asm!("mov %cr2, $0" : "=r"(faulting_addr));
@@ -93,7 +93,7 @@ interrupt_stack_err!(security, _stack, _error, {
     println!("Security Exception");
 });
 
-/// He's dead, Jim
+// He's dead, Jim
 interrupt_stack!(triple_fault, _stack, {
     println!("Triple Fault");
 });

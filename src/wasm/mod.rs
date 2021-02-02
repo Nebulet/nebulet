@@ -772,7 +772,7 @@ impl<'data, 'flags> ModuleTranslation<'data, 'flags> {
     /// relocations.
     pub fn compile(
         self,
-        isa: &isa::TargetIsa,
+        isa: &dyn isa::TargetIsa,
     ) -> Result<(Compilation, Module, Vec<DataInitializer>), nabi::Error> {
         let mut compiler = Compiler::with_capacity(isa, self.lazy.function_body_inputs.len());
         for (func_index, input) in self.lazy.function_body_inputs.iter().enumerate() {
